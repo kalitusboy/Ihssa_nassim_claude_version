@@ -1,0 +1,23 @@
+{
+  "name": "إحصاء السكن الريفي 2026",
+  "short_name": "إحصاء 2026",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0D47A1",
+  "theme_color": "#0D47A1",
+  "description": "تطبيق إحصاء السكن الريفي 2026 — نسيم الحوضان",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/Icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/Icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
