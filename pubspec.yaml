@@ -1,0 +1,62 @@
+name: ihsaa_windows_v11
+description: تطبيق إحصاء السكن الريفي 2026 — نسخة Windows
+publish_to: 'none'
+version: 11.1.0+1101
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # ── قاعدة البيانات (Windows FFI) ───────────────
+  sqflite: ^2.3.3+1
+  sqflite_common_ffi: ^2.3.3
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+  # ── ملفات وإكسل ────────────────────────────────
+  excel: ^4.0.6
+  file_picker: ^8.1.6
+  archive: ^3.6.1
+  open_file: ^3.5.10
+
+  # ── الصور (Windows: file_picker فقط) ──────────
+  image: ^4.2.0
+
+  # ── واجهة ورسوم ────────────────────────────────
+  fl_chart: ^0.71.0
+  intl: ^0.19.0
+
+  # ── مزامنة WiFi ────────────────────────────────
+  shelf: ^1.4.2
+  shelf_router: ^1.1.4
+  http: ^1.2.2
+  shared_preferences: ^2.3.4
+
+  # ── QR (عرض فقط) ───────────────────────────────
+  qr_flutter: ^4.1.0
+
+  # ── PDF ───────────────────────────────────────
+  pdf: ^3.11.1
+  printing: ^5.13.3
+
+  # ── نوافذ Windows ───────────────────────────────
+  window_manager: ^0.4.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Regular.ttf
+        - asset: assets/fonts/Cairo-Bold.ttf
+          weight: 700

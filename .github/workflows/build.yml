@@ -1,0 +1,78 @@
+name: Build Windows EXE — إحصاء السكن الريفي v11.01
+
+on:
+  push:
+    branches: [ aa_final ]
+  pull_request:
+    branches: [ aa_final ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Windows Release
+    runs-on: windows-2022      # VS 2022 مضمون
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.4'
+          channel: stable
+          cache: true
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      # ★ إصلاح مشكلة Visual Studio ★
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      # إنشاء مجلد windows/ فقط، ثم حذف test الافتراضي المُولَّد
+      - name: Create Windows platform files
+        run: flutter create --platforms=windows .
+
+      - name: Remove auto-generated test folder
+        shell: pwsh
+        run: |
+          if (Test-Path "test") {
+            Remove-Item -Recurse -Force "test"
+            Write-Host "✅ Removed auto-generated test/ folder"
+          }
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-warnings
+        continue-on-error: true
+
+      - name: Build Windows Release
+        run: flutter build windows --release --no-tree-shake-icons
+
+      - name: Build info
+        shell: pwsh
+        run: |
+          Write-Host "══════════════════════════════════"
+          Write-Host "✅ Windows EXE built successfully"
+          Get-ChildItem "build\windows\x64\runner\Release\" | Select-Object Name, Length
+          Write-Host "══════════════════════════════════"
+
+      - name: Compress Release folder
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path "build\windows\x64\runner\Release\*" `
+            -DestinationPath "ihsaa_windows_v11_release.zip"
+          $size = [math]::Round((Get-Item ihsaa_windows_v11_release.zip).Length / 1MB, 1)
+          Write-Host "ZIP size: $size MB"
+
+      - name: Upload Windows Release
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihsaa-windows-v11-${{ github.run_number }}
+          path: ihsaa_windows_v11_release.zip
+          retention-days: 30
+          if-no-files-found: error
