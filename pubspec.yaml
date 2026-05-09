@@ -51,6 +51,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  inno_bundle: ^0.1.0   # ⬅️ أضفنا هذه الحزمة
 
 flutter:
   uses-material-design: true
@@ -60,3 +61,13 @@ flutter:
         - asset: assets/fonts/Cairo-Regular.ttf
         - asset: assets/fonts/Cairo-Bold.ttf
           weight: 700
+
+# ⬇️ إعدادات inno_bundle لإنشاء Setup.exe
+inno_bundle:
+  id: "86d8c2c4-9d09-5f12-8f56-3b9a6b0c2f4b"   # يمكنك تغيير هذا المعرف (فريد)
+  name: "إحصاء السكن الريفي 2026"
+  version: "11.1.0"
+  publisher: "حميتي نسيم - الحوضان"
+  languages: ["arabic"]
+  # installer_icon: "assets/icon.ico"   # أضف هذا السطر إذا وضعت أيقونة .ico في مجلد assets
+  output_dir: "build/windows/installer"
