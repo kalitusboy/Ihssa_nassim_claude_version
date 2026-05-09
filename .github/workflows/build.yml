@@ -2,9 +2,9 @@ name: Build Windows EXE with Setup Installer
 
 on:
   push:
-    branches: [ inno_setup ]
+    branches: [ Inno_steup ]
   pull_request:
-    branches: [ inno_setup ]
+    branches: [ Inno_steup ]
   workflow_dispatch:
 
 jobs:
