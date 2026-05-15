@@ -1,0 +1,123 @@
+name: Build Windows EXE with Setup Installer
+
+on:
+  push:
+    branches: [ Inno_steup ]
+  pull_request:
+    branches: [ Inno_steup ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Windows Release + Setup.exe
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.4'
+          channel: stable
+          cache: true
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Create Windows platform files
+        run: flutter create --platforms=windows .
+
+      - name: Remove auto-generated test folder
+        shell: pwsh
+        run: |
+          if (Test-Path "test") {
+            Remove-Item -Recurse -Force "test"
+            Write-Host "✅ Removed auto-generated test/ folder"
+          }
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build Windows Release
+        run: flutter build windows --release --no-tree-shake-icons
+
+      - name: Create Inno Setup script (setup.iss)
+        shell: pwsh
+        run: |
+          $appName = "إحصاء السكن الريفي 2026"
+          $appVersion = "11.1.0"
+          $publisher = "حميتي نسيم - الحوضان"
+          $exeName = "ihsaa_windows_v11.exe"
+          $sourceDir = "build\windows\x64\runner\Release"
+
+          New-Item -ItemType Directory -Force -Path "assets" | Out-Null
+          $issFile = "setup.iss"
+          if (Test-Path $issFile) { Remove-Item $issFile }
+
+          Add-Content -Path $issFile -Value "[Setup]" -Encoding UTF8
+          Add-Content -Path $issFile -Value "AppId={{86d8c2c4-9d09-5f12-8f56-3b9a6b0c2f4b}}" -Encoding UTF8
+          Add-Content -Path $issFile -Value "AppName=$appName" -Encoding UTF8
+          Add-Content -Path $issFile -Value "AppVersion=$appVersion" -Encoding UTF8
+          Add-Content -Path $issFile -Value "AppPublisher=$publisher" -Encoding UTF8
+          Add-Content -Path $issFile -Value "DefaultDirName={autopf}\$appName" -Encoding UTF8
+          Add-Content -Path $issFile -Value "DefaultGroupName=$appName" -Encoding UTF8
+          Add-Content -Path $issFile -Value "UninstallDisplayIcon={app}\$exeName" -Encoding UTF8
+          Add-Content -Path $issFile -Value "Compression=lzma2" -Encoding UTF8
+          Add-Content -Path $issFile -Value "SolidCompression=yes" -Encoding UTF8
+          Add-Content -Path $issFile -Value "OutputDir=build\windows\installer" -Encoding UTF8
+          Add-Content -Path $issFile -Value "OutputBaseFilename=Setup_$appName" -Encoding UTF8
+          # Add-Content -Path $issFile -Value "SetupIconFile=assets\icon.ico" -Encoding UTF8   # قم بإلغاء التعليق إذا كان لديك أيقونة
+          Add-Content -Path $issFile -Value "WizardStyle=modern" -Encoding UTF8
+          Add-Content -Path $issFile -Value "" -Encoding UTF8
+          Add-Content -Path $issFile -Value "[Languages]" -Encoding UTF8
+          Add-Content -Path $issFile -Value "Name: `"arabic`"; MessagesFile: `"compiler:Languages\Arabic.isl`"" -Encoding UTF8
+          Add-Content -Path $issFile -Value "" -Encoding UTF8
+          Add-Content -Path $issFile -Value "[Tasks]" -Encoding UTF8
+          Add-Content -Path $issFile -Value "Name: `"desktopicon`"; Description: `"إنشاء أيقونة على سطح المكتب`"; GroupDescription: `"الأيقونات الإضافية:`"; Flags: unchecked" -Encoding UTF8
+          Add-Content -Path $issFile -Value "" -Encoding UTF8
+          Add-Content -Path $issFile -Value "[Files]" -Encoding UTF8
+          Add-Content -Path $issFile -Value "Source: `"$sourceDir\*`"; DestDir: `"{app}`"; Flags: ignoreversion recursesubdirs createallsubdirs" -Encoding UTF8
+          Add-Content -Path $issFile -Value "" -Encoding UTF8
+          Add-Content -Path $issFile -Value "[Icons]" -Encoding UTF8
+          Add-Content -Path $issFile -Value "Name: `"{autoprograms}\$appName`"; Filename: `"{app}\$exeName`"" -Encoding UTF8
+          Add-Content -Path $issFile -Value "Name: `"{commondesktop}\$appName`"; Filename: `"{app}\$exeName`"; Tasks: desktopicon" -Encoding UTF8
+          Add-Content -Path $issFile -Value "" -Encoding UTF8
+          Add-Content -Path $issFile -Value "[Run]" -Encoding UTF8
+          Add-Content -Path $issFile -Value "Filename: `"{app}\$exeName`"; Description: `"تشغيل التطبيق`"; Flags: postinstall nowait skipifsilent" -Encoding UTF8
+
+          Write-Host "✅ Created $issFile"
+
+      - name: Compile Setup.exe using Inno Setup
+        shell: pwsh
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (Test-Path $iscc) {
+            & $iscc "setup.iss"
+          } else {
+            Write-Error "Inno Setup ISCC.exe not found"
+            exit 1
+          }
+
+      - name: Upload Setup.exe as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Setup-Installer
+          path: build\windows\installer\*.exe
+          retention-days: 30
+
+      - name: Compress Release folder (backup)
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "ihsaa_windows_v11_release.zip"
+
+      - name: Upload Release folder zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: Release-Folder-Zip
+          path: ihsaa_windows_v11_release.zip
+          retention-days: 30

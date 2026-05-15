@@ -1,0 +1,45 @@
+# ── Flutter ────────────────────────────────────
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# ── Windows build output ────────────────────────
+*.exe
+*.dll
+*.pdb
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugin_registrant.h
+windows/flutter/generated_plugins.cmake
+
+# ── IDE ─────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+
+# ── OS ──────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── قواعد البيانات والبيانات الشخصية ────────────
+*.db
+*.db-wal
+*.db-shm
+ihsa_backup_*.json
+ihsa_images_*.zip
+
+# ── المفاتيح والأسرار ────────────────────────────
+*.jks
+*.keystore
+*.p12
+.env
+secrets.json
+
+# ── سجلات ───────────────────────────────────────
+*.log
